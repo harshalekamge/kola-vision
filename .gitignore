@@ -1,0 +1,6 @@
+dataset/
+runs/
+models/*.pt
+__pycache__/
+*.pyc
+yolo*.pt

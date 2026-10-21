@@ -1,0 +1,6 @@
+ultralytics>=8.3
+mss>=9.0
+pyautogui>=0.9.54
+pillow>=10.0
+numpy
+easyocr>=1.7

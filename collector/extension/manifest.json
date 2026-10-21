@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Kola Dataset Collector",
+  "version": "1.0.0",
+  "description": "Auto-labels YouTube UI elements and saves screenshot + YOLO labels to the local Kola collector server.",
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["labeler.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "Kola Collector" }
+}

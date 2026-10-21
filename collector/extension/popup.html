@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font: 13px system-ui, sans-serif; width: 300px; margin: 12px; color: #1f1f1f; }
+  h1 { font-size: 15px; margin: 0 0 8px; }
+  .row { display: flex; gap: 6px; margin: 6px 0; }
+  button { flex: 1; padding: 7px; border: 1px solid #ccc; border-radius: 6px; background: #f6f6f6; cursor: pointer; }
+  button.primary { background: #c00; color: #fff; border-color: #c00; }
+  label { display: block; margin: 3px 0; }
+  #server, #status { font: 12px monospace; background: #f3f3f3; padding: 6px; border-radius: 6px; margin-top: 6px; white-space: pre-wrap; }
+  input[type=number] { width: 70px; }
+</style>
+</head>
+<body>
+  <h1>Kola Dataset Collector</h1>
+  <div id="server">Checking server…</div>
+  <div class="row">
+    <button id="preview">Preview labels</button>
+    <button id="once">Capture once</button>
+  </div>
+  <fieldset>
+    <legend>Auto collection</legend>
+    <label>Screenshots: <input id="count" type="number" value="300" min="1" max="5000"></label>
+    <label><input id="navigate" type="checkbox" checked> Visit other pages (home / search / subscriptions)</label>
+    <label><input id="sidebar" type="checkbox" checked> Toggle sidebar open/collapsed</label>
+    <label><input id="zoom" type="checkbox" checked> Randomize zoom</label>
+    <label><input id="resize" type="checkbox"> Randomize window size</label>
+  </fieldset>
+  <div class="row">
+    <button id="start" class="primary">Start</button>
+    <button id="stop">Stop</button>
+  </div>
+  <div id="status">Idle</div>
+  <script src="popup.js"></script>
+</body>
+</html>
