@@ -159,9 +159,6 @@ class App:
         self._rows = []
         self._current = None
         self._last_problem = ""
-        self._log_lines = []
-        self._steps_json = "[]"
-        self.details = None
 
         fam = "Segoe UI Variable Text"
         self.f_title = ctk.CTkFont(fam, 20, "bold")
@@ -215,7 +212,7 @@ class App:
                             text_color=INK, font=self.f_title)
         logo.pack(pady=(0, 60))
         for icon, tip, cmd, dark in (("👁", "Look at screen", self.look, True),
-                                     ("☰", "Details: steps and log", self.toggle_details, False),
+                                     ("☰", "Show or hide steps and log", self.toggle_panel, False),
                                      ("■", "Stop", self.stop.set, False)):
             b = self.circle(rail, icon, cmd, dark=dark)
             b.pack(pady=7)
@@ -276,8 +273,32 @@ class App:
         self.view.pack(fill="both", expand=True, padx=10, pady=10)
         self.view_box.bind("<Configure>", lambda e: self._last_frame is not None and self._show(self._last_frame))
 
+        # steps (JSON) and log, side by side under the live view
+        self.panel = ctk.CTkFrame(c, fg_color="transparent")
+        self.panel.grid(row=2, column=0, sticky="ew", padx=24, pady=(14, 0))
+        self.panel.grid_columnconfigure((0, 1), weight=1, uniform="p")
+        for col, title in ((0, "Steps"), (1, "Log")):
+            box = ctk.CTkFrame(self.panel, fg_color=SOFT, corner_radius=18)
+            box.grid(row=0, column=col, sticky="nsew", padx=(0, 7) if col == 0 else (7, 0))
+            head = ctk.CTkFrame(box, fg_color="transparent")
+            head.pack(fill="x", padx=16, pady=(10, 4))
+            self.label(head, title, self.f_bold).pack(side="left")
+            text = ctk.CTkTextbox(box, height=150, font=self.f_mono if col == 0 else self.f_small, fg_color=SOFT, text_color=INK,
+                                  corner_radius=0, border_width=0, wrap="none" if col == 0 else "word",
+                                  scrollbar_button_color=SOFT, scrollbar_button_hover_color=LINE)
+            text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+            if col == 0:
+                self.label(head, "editable", self.f_small, MUTED).pack(side="left", padx=8)
+                self.pill(head, "Run steps", self.run_steps_text, height=30, font=self.f_small, width=100).pack(side="right")
+                self.steps_text = text
+                text.insert("1.0", "[]")
+            else:
+                self.label(head, "what Kola saw and did", self.f_small, MUTED).pack(side="left", padx=8)
+                self.log_text = text
+                text.configure(state="disabled")
+
         bar = ctk.CTkFrame(c, fg_color=SOFT, corner_radius=22)
-        bar.grid(row=2, column=0, sticky="ew", padx=24, pady=20)
+        bar.grid(row=3, column=0, sticky="ew", padx=24, pady=20)
         self.cmd = ctk.CTkEntry(bar, placeholder_text="Tell Kola what to do, for example: Go to Watch Later",
                                 height=48, border_width=0, fg_color=SOFT, font=self.f_input, text_color=INK,
                                 placeholder_text_color=MUTED)
@@ -349,40 +370,12 @@ class App:
                         checkmark_color=CARD, corner_radius=7, checkbox_width=22, checkbox_height=22).pack(
             anchor="w", padx=22, pady=(12, 18))
 
-    # ---------- details window (JSON steps + log) ----------
-    def toggle_details(self):
-        if self.details is not None and self.details.winfo_exists():
-            if self.details.state() == "withdrawn":
-                self.details.deiconify()
-                self.details.lift()
-            else:
-                self.details.withdraw()
-            return
-        w = ctk.CTkToplevel(self.root)
-        w.title("Kola · details")
-        w.geometry("1000x520")
-        w.configure(fg_color=BG)
-        w.protocol("WM_DELETE_WINDOW", w.withdraw)
-        w.grid_columnconfigure((0, 1), weight=1)
-        w.grid_rowconfigure(0, weight=1)
-        left = self.card(w)
-        left.grid(row=0, column=0, sticky="nsew", padx=(18, 8), pady=18)
-        head = ctk.CTkFrame(left, fg_color="transparent")
-        head.pack(fill="x", padx=20, pady=(16, 8))
-        self.label(head, "Steps for the vision module", self.f_h).pack(side="left")
-        self.pill(head, "Run these steps", self.run_steps_text, height=34, font=self.f_small, width=130).pack(side="right")
-        self.steps_text = ctk.CTkTextbox(left, font=self.f_mono, fg_color=SOFT, corner_radius=14, text_color=INK)
-        self.steps_text.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        self.steps_text.insert("1.0", self._steps_json)
-        right = self.card(w)
-        right.grid(row=0, column=1, sticky="nsew", padx=(8, 18), pady=18)
-        self.label(right, "Log", self.f_h).pack(anchor="w", padx=20, pady=(16, 8))
-        self.log_text = ctk.CTkTextbox(right, font=self.f_mono, fg_color=SOFT, corner_radius=14, text_color=INK)
-        self.log_text.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        self.log_text.insert("1.0", "\n".join(self._log_lines) + "\n")
-        self.log_text.see("end")
-        self.log_text.configure(state="disabled")
-        self.details = w
+    def toggle_panel(self):
+        """Show or hide the steps + log panel under the live view."""
+        if self.panel.winfo_ismapped():
+            self.panel.grid_remove()
+        else:
+            self.panel.grid()
 
     # ---------- plumbing ----------
     def log(self, msg):
@@ -418,12 +411,10 @@ class App:
 
     def _on_log(self, msg):
         line = f"{time.strftime('%H:%M:%S')}  {msg}"
-        self._log_lines.append(line)
-        if self.details is not None and self.details.winfo_exists():
-            self.log_text.configure(state="normal")
-            self.log_text.insert("end", line + "\n")
-            self.log_text.see("end")
-            self.log_text.configure(state="disabled")
+        self.log_text.configure(state="normal")
+        self.log_text.insert("end", line + "\n")
+        self.log_text.see("end")
+        self.log_text.configure(state="disabled")
         if msg.startswith("  ") and self._current is not None and self._current <= len(self._rows):
             detail = self._rows[self._current - 1][2]
             detail.configure(text=friendly_detail(msg))
@@ -462,7 +453,7 @@ class App:
             self.q.put(("state", ("Ready", "ready")))
             self.log("Kola is ready.")
         except Exception as e:
-            self.q.put(("state", ("Couldn't start, see details (☰)", "error")))
+            self.q.put(("state", ("Couldn't start, see the log", "error")))
             self.log(f"Failed to load model: {e}")
 
     # ---------- running tasks ----------
@@ -482,10 +473,8 @@ class App:
             detail = self.label(col, "", self.f_small, MUTED, wraplength=240, justify="left", anchor="w", height=18)
             self._rows.append((icon, title, detail))
         self.result.configure(text="")
-        self._steps_json = json.dumps(steps, indent=2)
-        if self.details is not None and self.details.winfo_exists():
-            self.steps_text.delete("1.0", "end")
-            self.steps_text.insert("1.0", self._steps_json)
+        self.steps_text.delete("1.0", "end")
+        self.steps_text.insert("1.0", json.dumps(steps, indent=2))
 
     def _on_step(self, i, state):
         if i > len(self._rows):
@@ -510,7 +499,7 @@ class App:
         elif self.stop.is_set():
             self.result.configure(text="Stopped.", text_color=MUTED)
         else:
-            reason = self._last_problem or "open details (☰) to see the log."
+            reason = self._last_problem or "see the log for details."
             self.result.configure(text=f"Kola couldn't finish: {reason}", text_color=ALERT)
         self.set_state("Ready", "ready")
         if self.hide.get():
