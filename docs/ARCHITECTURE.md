@@ -38,7 +38,7 @@ For every pointer step (click, hover...), the agent runs **look → understand �
 | `kola/planner.py` | Rule-based stand-in for the language module: English sentence → steps |
 | `kola/executor.py` | `pyautogui` mouse and keyboard: smooth eased movement, hover pause, clicks, typing |
 | `kola/agent.py` | Ties it together: runs steps, recovery, verification, draws the "what Kola sees" overlay |
-| `kola_demo.py` | Tkinter demo UI; runs the agent in a background thread |
+| `kola_demo.py` | Demo UI (CustomTkinter): task bar, live view, plain-language progress; runs the agent in a background thread |
 
 ## Screen understanding: two complementary signals
 

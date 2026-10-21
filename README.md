@@ -63,14 +63,18 @@ The first start downloads EasyOCR's text models (~100 MB). Wait for **"Kola is r
 ### 4. Use it
 
 1. Open YouTube in Chrome, **logged in**, and press **F11** (full screen). Keep it behind the Kola window.
-2. **👁 Look at screen** shows every element the model detects.
-3. Run a task in one of three ways:
-   - **Say a command:** pick a scenario or type one, then **▶ Run command**.
-   - **Pick action + navigation point:** e.g. `left_click` + `watch_later`, then **▶ Do it**.
-   - **Steps:** edit the JSON plan and **▶ Run steps** (see [docs/INTERFACE.md](docs/INTERFACE.md)).
+2. **Look at screen** (top right, or 👁 on the left) shows every element the model recognises.
+3. Give Kola a task in one of three ways:
+   - **Type it** in the bar under the live view and press **Enter** or **↑**. The cards under
+     *Try a task* fill in example commands.
+   - **Do one thing:** pick an action and a place (e.g. *Click* + *Watch later*), then **Do it**.
+     With *Search box* selected, the text field is what to search for.
+   - **Steps (JSON):** ☰ on the left opens the details window, where you can edit and run the
+     step list (see [docs/INTERFACE.md](docs/INTERFACE.md)) and read the full log.
 
-Kola minimizes itself, moves the cursor, acts, and comes back with a log of what it saw and did.
-**Emergency stop:** move the mouse hard into a screen corner.
+Kola minimizes itself, moves the cursor, acts, and comes back. **Progress** lists each step in
+plain words as it happens; the live view rings what Kola acted on in amber.
+**Stop:** ■ on the left, or move the mouse hard into a screen corner.
 
 ### Demo commands
 
@@ -103,7 +107,7 @@ Run the logic tests (no model or screen needed): `python tests/test_logic.py`
 ## Project layout
 
 ```
-kola_demo.py              demo app (Tkinter UI)
+kola_demo.py              demo app (CustomTkinter UI)
 kola/                     the module: detector, OCR, grounding, planner, executor, agent
 collector/extension/      Chrome extension that auto-labels YouTube screenshots
 collector/collector_server.py   saves screenshots + labels as a YOLO dataset
