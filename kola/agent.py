@@ -140,13 +140,22 @@ class Kola:
                 self.log(f"  {'✓ screen changed' if changed else '… no visible change'} (diff {amount:.1f})")
                 return True
             self.log(f"  {why}")
-            if not self._recover(target, attempt, ctx):
+            recovered = self._recover(target, attempt, ctx)
+            if recovered == "done":
+                return True
+            if not recovered:
                 return False
         return False
 
     def _recover(self, target, attempt, ctx):
         """Make a hidden target visible: open the sidebar, or scroll the feed."""
         typ = target.get("type")
+        if typ == "search_button":
+            # The search bar looks different while typing; Enter submits the search just the same.
+            self.log("  ↳ search button not detected — pressing Enter instead")
+            self.hands.press("enter")
+            time.sleep(1.5)
+            return "done"
         if typ in SIDEBAR_CLASSES and attempt == 0:
             menu, _ = ground({"type": "menu_button"}, ctx)
             if menu is not None:
