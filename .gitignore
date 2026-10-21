@@ -4,3 +4,6 @@ models/*.pt
 __pycache__/
 *.pyc
 yolo*.pt
+
+# archives (dataset uploads to Colab, training results)
+*.zip
