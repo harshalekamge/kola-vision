@@ -90,6 +90,8 @@ class App:
         self.target.set(f"watch_later — {FRIENDLY['watch_later']}")
         self.target.grid(row=1, column=1, sticky="w", padx=4, pady=2)
         ttk.Label(grid, text="Text (optional)").grid(row=2, column=0, sticky="w")
+        ttk.Label(box, text="Text = the element's visible label (e.g. chip “Gaming”).\nFor search_box, Text = what to search for.",
+                  style="Sub.TLabel").pack(anchor="w")
         self.ttext = ttk.Entry(grid, width=24)
         self.ttext.grid(row=2, column=1, sticky="w", padx=4, pady=2)
         ttk.Label(grid, text="Which one (#)").grid(row=3, column=0, sticky="w")
@@ -237,9 +239,16 @@ class App:
 
     def run_manual(self):
         cls = self.target.get().split(" — ")[0]
+        text = self.ttext.get().strip()
+        if cls == "search_box" and text:
+            # For the search box, Text means "what to search for".
+            steps, _ = plan(f"Search for {text}")
+            self._set_steps(steps)
+            self._start(lambda: self.kola.run(steps, self.stop))
+            return
         tgt = {"type": cls}
-        if self.ttext.get().strip():
-            tgt["text"] = "~" + self.ttext.get().strip()
+        if text:
+            tgt["text"] = "~" + text
         idx = int(self.index.get() or 1) - 1
         if idx:
             tgt["index"] = idx
