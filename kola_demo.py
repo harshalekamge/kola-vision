@@ -74,7 +74,7 @@ def target_name(t):
         if t.get("contains"):
             name = f"the {NOUN[typ]} showing " + " and ".join(f"“{_clean(c)}”" for c in t["contains"])
     else:
-        name = NOUN.get(typ, typ.replace("_", " "))
+        name = NOUN.get(typ) or FRIENDLY.get(typ) or typ.replace("_", " ")
     if t.get("inside"):
         inner = t["inside"]
         owner = ", ".join(_clean(c) for c in inner.get("contains", []))
