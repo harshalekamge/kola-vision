@@ -69,8 +69,9 @@ The first start downloads EasyOCR's text models (~100 MB). Wait for **"Kola is r
      *Try a task* fill in example commands.
    - **Do one thing:** pick an action and a place (e.g. *Click* + *Watch later*), then **Do it**.
      With *Search box* selected, the text field is what to search for.
-   - **Steps (JSON):** ☰ on the left opens the details window, where you can edit and run the
-     step list (see [docs/INTERFACE.md](docs/INTERFACE.md)) and read the full log.
+   - **Steps (JSON):** under the live view, the *Steps* panel shows the plan for every task. Edit it
+     and press **Run steps** (see [docs/INTERFACE.md](docs/INTERFACE.md)). The *Log* panel next to it
+     shows everything Kola saw and did. ☰ on the left shows or hides both panels.
 
 Kola minimizes itself, moves the cursor, acts, and comes back. **Progress** lists each step in
 plain words as it happens; the live view rings what Kola acted on in amber.
