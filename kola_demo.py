@@ -1,6 +1,6 @@
 """Kola demo app — screen understanding + task execution on YouTube.
 
-    python kola_demo.py                      # uses models/kola_yolo.onnx (or .pt)
+    python kola_demo.py                      # picks models/kola_yolo.pt (full install) or .onnx (lite)
     python kola_demo.py --weights path/to/best.pt --no-ocr
 
 Put YouTube in Chrome behind this window (best: Chrome full screen with F11).
@@ -259,10 +259,23 @@ class App:
         self._start(self.kola.describe_screen if self.kola else (lambda: None))
 
 
+def default_weights():
+    """Use the .pt model when PyTorch/Ultralytics is installed, otherwise the .onnx model."""
+    import importlib.util
+    pt, onnx = ROOT / "models" / "kola_yolo.pt", ROOT / "models" / "kola_yolo.onnx"
+    has_ultralytics = importlib.util.find_spec("ultralytics") is not None
+    has_onnxruntime = importlib.util.find_spec("onnxruntime") is not None
+    if pt.exists() and (has_ultralytics or not (onnx.exists() and has_onnxruntime)):
+        return str(pt)
+    if onnx.exists():
+        return str(onnx)
+    return str(pt)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    onnx = ROOT / "models" / "kola_yolo.onnx"
-    ap.add_argument("--weights", default=str(onnx if onnx.exists() else ROOT / "models" / "kola_yolo.pt"))
+    ap.add_argument("--weights", default=default_weights(),
+                    help="trained model: .pt (full install, uses the GPU) or .onnx (lite install)")
     ap.add_argument("--no-ocr", action="store_true", help="skip OCR (chips/titles/text targets won't work)")
     a = ap.parse_args()
     root = tk.Tk()
