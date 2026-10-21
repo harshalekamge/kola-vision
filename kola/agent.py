@@ -3,7 +3,7 @@ import time
 
 from PIL import ImageChops, ImageDraw
 
-from .classes import CLASSES, FEED_CLASSES, SIDEBAR_CLASSES
+from .classes import CLASSES, FEED_CLASSES, MINI_GUIDE_CLASSES, SIDEBAR_CLASSES, SIDEBAR_ORDER
 from .grounding import Context, describe, ground
 
 TARGET = "#F4A62A"  # Kola's focus colour: the element it is about to act on
@@ -132,7 +132,9 @@ class Kola:
 
     def _pointer_step(self, step):
         target = step["target"]
-        for attempt in range(int(step.get("attempts", 4))):
+        # sidebar items may need the menu opened plus a few scrolls of the sidebar
+        default_attempts = 6 if target.get("type") in SIDEBAR_CLASSES else 4
+        for attempt in range(int(step.get("attempts", default_attempts))):
             ctx = self.look()
             try:
                 el, why = ground(target, ctx)
@@ -165,13 +167,8 @@ class Kola:
             self.hands.press("enter")
             time.sleep(1.5)
             return "done"
-        if typ in SIDEBAR_CLASSES and attempt == 0:
-            menu, _ = ground({"type": "menu_button"}, ctx)
-            if menu is not None:
-                self.log("  ↳ sidebar looks collapsed — opening the menu")
-                self.hands.pointer("left_click", *self.screen.to_screen(*menu.center))
-                time.sleep(1.2)
-                return True
+        if typ in SIDEBAR_CLASSES:
+            return self._recover_sidebar(typ, attempt, ctx)
         if typ in FEED_CLASSES or target.get("inside", {}).get("type") in FEED_CLASSES:
             self.log("  ↳ not on screen — scrolling down")
             x, y = self.screen.center()
@@ -179,6 +176,35 @@ class Kola:
             time.sleep(1.5)
             return True
         return False
+
+
+    def _recover_sidebar(self, typ, attempt, ctx):
+        """Open the sidebar if it's collapsed; otherwise scroll it toward the target."""
+        visible = [e for e in ctx.elements if e.cls in SIDEBAR_CLASSES]
+        expanded = any(e.cls not in MINI_GUIDE_CLASSES for e in visible)
+        if not expanded and attempt == 0:
+            menu, _ = ground({"type": "menu_button"}, ctx)
+            if menu is not None:
+                self.log("  ↳ sidebar looks collapsed — opening the menu")
+                self.hands.pointer("left_click", *self.screen.to_screen(*menu.center))
+                time.sleep(1.2)
+                return True
+
+        # Scroll over the sidebar: up if the target sits above everything visible, otherwise down.
+        order = {name: i for i, name in enumerate(SIDEBAR_ORDER)}
+        seen = [order[e.cls] for e in visible if e.cls in order]
+        up = bool(seen) and order[typ] < min(seen)
+        if visible:
+            cx = sorted(e.center[0] for e in visible)[len(visible) // 2]
+            cy = sum(e.center[1] for e in visible) / len(visible)
+            x, y = self.screen.to_screen(cx, cy)
+        else:
+            mon = self.screen.mon
+            x, y = mon["left"] + mon["width"] * 0.07, mon["top"] + mon["height"] * 0.5
+        self.log(f"  ↳ not in view — scrolling the sidebar {'up' if up else 'down'}")
+        self.hands.scroll(x, y, 5 if up else -5)
+        time.sleep(1.0)
+        return True
 
 
 def summarize(els):

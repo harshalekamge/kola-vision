@@ -131,6 +131,66 @@ def test_search_button_not_detected_falls_back_to_enter():
     assert w.page == "results"
 
 
+class SidebarWorld(FakeWorld):
+    """Sidebar with items top to bottom; only a window of them is visible at a time."""
+
+    ITEMS = ["home", "shorts", "subscriptions", "your_channel", "history", "playlists", "watch_later",
+             "music", "gaming", "playables", "premium", "youtube_music", "youtube_kids", "report_history"]
+
+    def __init__(self, expanded=True, first=0, window=7):
+        super().__init__()
+        self.expanded, self.first, self.window = expanded, first, window
+
+    def elements(self):
+        els = [Element("menu_button", 0.95, (10, 15, 50, 55)), Element("search_box", 0.95, (600, 15, 1200, 55))]
+        if not self.expanded:
+            return els + [Element(c, 0.9, (5, 100 + 80 * i, 70, 160 + 80 * i)) for i, c in enumerate(self.ITEMS[:3])]
+        for i, c in enumerate(self.ITEMS[self.first:self.first + self.window]):
+            els.append(Element(c, 0.9, (10, 100 + 50 * i, 230, 140 + 50 * i)))
+        return els
+
+
+class SidebarHands(FakeHands):
+    def pointer(self, action, x, y):
+        self.world.actions.append((action, round(x), round(y)))
+        if (10 <= x <= 50) and (15 <= y <= 55):
+            self.world.expanded = not self.world.expanded
+
+    def scroll(self, x, y, clicks):
+        self.world.actions.append(("scroll", clicks))
+        step = 3 if clicks < 0 else -3
+        self.world.first = max(0, min(len(self.world.ITEMS) - self.world.window, self.world.first + step))
+
+
+def run_sidebar(command, world):
+    import kola.agent as agent
+    agent.time.sleep = lambda s: None
+    k = make_kola(world)
+    k.hands = SidebarHands(world)
+    steps, _ = plan(command)
+    return k.run(steps)
+
+
+def test_collapsed_sidebar_opens_menu_then_clicks():
+    w = SidebarWorld(expanded=False)
+    assert run_sidebar("Go to Playlists", w)
+    assert w.actions[0] == ("left_click", 30, 35)  # menu
+    assert w.expanded
+
+
+def test_item_far_down_scrolls_sidebar_down():
+    w = SidebarWorld(expanded=True, first=0)
+    assert run_sidebar("Open report history", w)
+    assert ("scroll", -5) in w.actions and ("scroll", 5) not in w.actions
+    assert ("left_click", 30, 35) not in w.actions  # sidebar was open: never touched the menu
+
+
+def test_item_above_scrolls_sidebar_up():
+    w = SidebarWorld(expanded=True, first=7)  # scrolled to the bottom
+    assert run_sidebar("Go to Home", w)
+    assert ("scroll", 5) in w.actions and ("scroll", -5) not in w.actions
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
