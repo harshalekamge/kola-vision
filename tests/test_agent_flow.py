@@ -135,7 +135,7 @@ class SidebarWorld(FakeWorld):
     """Sidebar with items top to bottom; only a window of them is visible at a time."""
 
     ITEMS = ["home", "shorts", "subscriptions", "your_channel", "history", "playlists", "watch_later",
-             "music", "gaming", "playables", "premium", "youtube_music", "youtube_kids", "report_history"]
+             "liked_videos", "your_videos", "downloads", "music", "gaming", "playables", "premium", "youtube_music", "youtube_kids", "report_history"]
 
     def __init__(self, expanded=True, first=0, window=7):
         super().__init__()
@@ -186,7 +186,7 @@ def test_item_far_down_scrolls_sidebar_down():
 
 
 def test_item_above_scrolls_sidebar_up():
-    w = SidebarWorld(expanded=True, first=7)  # scrolled to the bottom
+    w = SidebarWorld(expanded=True, first=10)  # scrolled to the bottom
     assert run_sidebar("Go to Home", w)
     assert ("scroll", 5) in w.actions and ("scroll", -5) not in w.actions
 

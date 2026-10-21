@@ -3,7 +3,7 @@
 The ORDER matters: the class id in YOLO label files is the index in this list.
 Do not reorder after you have collected data (append new classes at the end).
 
-Classes 0–11 were in the first model (v1). Classes 12–20 were added in v2
+Classes 0–11 were in the first model (v1). Classes 12–23 were added in v2
 (more sidebar destinations); a v1 model still works, since Kola falls back to
 reading the label with OCR for any class the loaded model doesn't know.
 """
@@ -31,22 +31,25 @@ CLASSES = [
     "youtube_music",   # 18 sidebar (More from YouTube): YouTube Music
     "youtube_kids",    # 19 sidebar (More from YouTube): YouTube Kids
     "report_history",  # 20 sidebar (bottom): Report history
+    "liked_videos",    # 21 sidebar (You): Liked videos
+    "your_videos",     # 22 sidebar (You): Your videos (opens YouTube Studio)
+    "downloads",       # 23 sidebar (You): Downloads
 ]
 
 # Sidebar destinations, top to bottom as they appear in the expanded sidebar.
 # Kola uses this order to decide whether to scroll the sidebar up or down.
 SIDEBAR_ORDER = [
     "home", "shorts", "subscriptions",
-    "your_channel", "history", "playlists", "watch_later",
+    "your_channel", "history", "playlists", "watch_later", "liked_videos", "your_videos", "downloads",
     "music", "gaming", "playables",
     "premium", "youtube_music", "youtube_kids",
     "report_history",
 ]
 SIDEBAR_CLASSES = set(SIDEBAR_ORDER)
 
-# The collapsed sidebar (mini guide) only shows these. Seeing any other sidebar
-# item means the sidebar is already expanded.
-MINI_GUIDE_CLASSES = {"home", "shorts", "subscriptions"}
+# The collapsed sidebar (mini guide) only shows these (Downloads appears there on some accounts).
+# Seeing any other sidebar item means the sidebar is already expanded.
+MINI_GUIDE_CLASSES = {"home", "shorts", "subscriptions", "downloads"}
 
 # Elements that appear once per screen: pick the most confident detection
 # (protects against look-alikes such as the browser's own address bar).
@@ -63,4 +66,5 @@ FRIENDLY = {
     "your_channel": "Your channel", "playlists": "Playlists", "music": "Music", "gaming": "Gaming",
     "playables": "Playables", "premium": "YouTube Premium", "youtube_music": "YouTube Music",
     "youtube_kids": "YouTube Kids", "report_history": "Report history",
+    "liked_videos": "Liked videos", "your_videos": "Your videos", "downloads": "Downloads",
 }

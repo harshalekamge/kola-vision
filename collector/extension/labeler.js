@@ -23,6 +23,7 @@
     // links that leave youtube.com
     if (u.hostname === 'music.youtube.com') return 'youtube_music';
     if (u.hostname.endsWith('youtubekids.com')) return 'youtube_kids';
+    if (u.hostname === 'studio.youtube.com') return 'your_videos';
     if (u.hostname !== location.hostname) return null;
     const p = u.pathname;
     if (p === '/') return 'home';
@@ -31,6 +32,8 @@
     if (p.startsWith('/feed/history')) return 'history';
     if (p === '/playlist' && u.searchParams.get('list') === 'WL') return 'watch_later';
     if (p.startsWith('/feed/playlists')) return 'playlists';
+    if (p === '/playlist' && u.searchParams.get('list') === 'LL') return 'liked_videos';
+    if (p.startsWith('/feed/downloads')) return 'downloads';
     if (p === '/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ') return 'music';   // YouTube's official Music channel
     if (p === '/gaming' || p.startsWith('/gaming/')) return 'gaming';
     if (p.startsWith('/playables')) return 'playables';
@@ -45,6 +48,7 @@
     'watch later': 'watch_later', 'your channel': 'your_channel', 'playlists': 'playlists',
     'music': 'music', 'gaming': 'gaming', 'playables': 'playables', 'youtube premium': 'premium',
     'youtube music': 'youtube_music', 'youtube kids': 'youtube_kids', 'report history': 'report_history',
+    'liked videos': 'liked_videos', 'your videos': 'your_videos', 'downloads': 'downloads',
   };
   function titleClass(entry, a) {
     const t = ((a && a.getAttribute('title')) || (entry.querySelector('.title, yt-formatted-string, .title-text') || entry).textContent || '')

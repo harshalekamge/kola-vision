@@ -101,6 +101,8 @@ def test_v2_sidebar_phrases():
         "Open YouTube Kids": "youtube_kids", "Show my channel": "your_channel", "Go to Your channel": "your_channel",
         "Open report history": "report_history", "Go to History": "history", "Go to Gaming": "gaming",
         "Open Playables": "playables", "Open YouTube Premium": "premium",
+        "Go to Liked videos": "liked_videos", "Open your videos": "your_videos", "Show my videos": "your_videos",
+        "Open Downloads": "downloads",
     }
     for cmd, cls in cases.items():
         steps, _ = plan(cmd)

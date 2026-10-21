@@ -28,8 +28,11 @@ automatically: no boxes were drawn by hand.
 | 18 | `youtube_music` | Sidebar (More from YouTube): YouTube Music *(v2)* |
 | 19 | `youtube_kids` | Sidebar (More from YouTube): YouTube Kids *(v2)* |
 | 20 | `report_history` | Sidebar (bottom): Report history *(v2)* |
+| 21 | `liked_videos` | Sidebar (You): Liked videos *(v2)* |
+| 22 | `your_videos` | Sidebar (You): Your videos, opens YouTube Studio *(v2)* |
+| 23 | `downloads` | Sidebar (You): Downloads *(v2)* |
 
-**v1** (the first model, results below) has classes 0–11. **v2** adds 12–20. A v1 model still
+**v1** (the first model, results below) has classes 0–11. **v2** adds 12–23. A v1 model still
 handles the v2 destinations by reading their labels with OCR, limited to the sidebar area.
 
 The order is defined in `kola/classes.py`. Class IDs in label files depend on it, so new classes must

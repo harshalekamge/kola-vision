@@ -87,8 +87,8 @@ plain words as it happens; the live view rings what Kola acted on in amber.
 | 4 | Click the Sign up button on the Firebase ad | Needs that ad on screen. Use the button text and advertiser you see |
 | 5 | Play the first video on the Shorts shelf | Scroll so the Shorts shelf is visible |
 
-Other forms that work: `right click history`, `hover over subscriptions`, `click Liked videos`,
-and the rest of the sidebar: `Go to Playlists`, `Open YouTube Kids`, `Go to my channel`,
+Other forms that work: `right click history`, `hover over subscriptions`, `click Settings`,
+and the rest of the sidebar: `Go to Playlists`, `Open Liked videos`, `Open YouTube Kids`, `Go to my channel`,
 `Open report history`. Kola opens or scrolls the sidebar to reach them.
 (clicks any visible text).
 

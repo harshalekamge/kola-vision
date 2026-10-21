@@ -12,7 +12,9 @@ import re
 SIDEBAR_WORDS = [
     ("youtube music", "youtube_music"), ("youtube kids", "youtube_kids"), ("youtube premium", "premium"),
     ("report history", "report_history"), ("your channel", "your_channel"), ("my channel", "your_channel"),
-    ("watch later", "watch_later"), ("playlists", "playlists"), ("playables", "playables"),
+    ("watch later", "watch_later"), ("liked videos", "liked_videos"), ("your videos", "your_videos"),
+    ("my videos", "your_videos"), ("downloads", "downloads"),
+    ("playlists", "playlists"), ("playables", "playables"),
     ("premium", "premium"), ("gaming", "gaming"), ("music", "music"), ("history", "history"),
     ("subscriptions", "subscriptions"), ("subscription", "subscriptions"),
     ("home", "home"), ("shorts", "shorts"),
@@ -90,6 +92,11 @@ def plan(command: str):
         if idx:
             tgt["index"] = idx
         return [{"action": act, "target": tgt, "settle": 3}], f"Open Shorts card #{idx + 1 if idx >= 0 else 'last'}"
+
+    # Sidebar pages named "... videos" (Liked videos, Your videos) before the "show X videos" chip pattern
+    for word, cls in SIDEBAR_WORDS:
+        if word.endswith(" videos") and re.search(rf"\b{word}\b", low):
+            return [{"action": act, "target": {"type": cls}, "settle": 2}], f"{act} sidebar item {cls}"
 
     # Scenario 3 — topic chips
     m = re.search(r"(?:switch|change)(?: the)?(?: feed)? to\s+(.+?)(?:\s+(?:videos|chip|feed|category|tab))?$", low) \
