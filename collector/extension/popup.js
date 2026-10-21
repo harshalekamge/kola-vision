@@ -41,6 +41,7 @@ $('start').onclick = async () => {
     count: parseInt($('count').value, 10) || 300,
     navigate: $('navigate').checked,
     sidebar: $('sidebar').checked,
+    guideScroll: $('guideScroll').checked,
     zoom: $('zoom').checked,
     resize: $('resize').checked,
   };

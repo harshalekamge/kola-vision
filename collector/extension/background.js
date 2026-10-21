@@ -103,6 +103,11 @@ async function autoRun(tabId, opts) {
         await chrome.tabs.sendMessage(tabId, { type: 'toggleSidebar' });
         await sleep(1000);
       }
+      if (opts.guideScroll && Math.random() < 0.45) {
+        const r = Math.random();
+        await chrome.tabs.sendMessage(tabId, { type: 'scrollGuide', y: r < 0.35 ? 'top' : r < 0.6 ? 'bottom' : 'random' });
+        await sleep(500);
+      }
       await chrome.tabs.sendMessage(tabId, { type: 'scroll', y: Math.random() < 0.4 ? 0 : 'random' });
       await sleep(1600); // let thumbnails render
 

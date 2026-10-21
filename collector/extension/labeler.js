@@ -20,16 +20,32 @@
     if (!href) return null;
     let u;
     try { u = new URL(href, location.origin); } catch { return null; }
+    // links that leave youtube.com
+    if (u.hostname === 'music.youtube.com') return 'youtube_music';
+    if (u.hostname.endsWith('youtubekids.com')) return 'youtube_kids';
+    if (u.hostname !== location.hostname) return null;
     const p = u.pathname;
     if (p === '/') return 'home';
     if (p.startsWith('/shorts')) return 'shorts';
     if (p.startsWith('/feed/subscriptions')) return 'subscriptions';
     if (p.startsWith('/feed/history')) return 'history';
     if (p === '/playlist' && u.searchParams.get('list') === 'WL') return 'watch_later';
+    if (p.startsWith('/feed/playlists')) return 'playlists';
+    if (p === '/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ') return 'music';   // YouTube's official Music channel
+    if (p === '/gaming' || p.startsWith('/gaming/')) return 'gaming';
+    if (p.startsWith('/playables')) return 'playables';
+    if (p.startsWith('/premium')) return 'premium';
+    if (p.startsWith('/reporthistory')) return 'report_history';
+    // "Your channel" links to /@handle, like every subscribed channel, so it is matched by name below
     return null;
   }
 
-  const TITLE_CLASSES = { 'home': 'home', 'shorts': 'shorts', 'subscriptions': 'subscriptions', 'history': 'history', 'watch later': 'watch_later' };
+  const TITLE_CLASSES = {
+    'home': 'home', 'shorts': 'shorts', 'subscriptions': 'subscriptions', 'history': 'history',
+    'watch later': 'watch_later', 'your channel': 'your_channel', 'playlists': 'playlists',
+    'music': 'music', 'gaming': 'gaming', 'playables': 'playables', 'youtube premium': 'premium',
+    'youtube music': 'youtube_music', 'youtube kids': 'youtube_kids', 'report history': 'report_history',
+  };
   function titleClass(entry, a) {
     const t = ((a && a.getAttribute('title')) || (entry.querySelector('.title, yt-formatted-string, .title-text') || entry).textContent || '')
       .trim().toLowerCase().replace(/\s+/g, ' ');
@@ -174,6 +190,16 @@
         }
         window.scrollTo(0, y);
         send({ ok: true });
+        break;
+      }
+      case 'scrollGuide': {
+        // Scroll the expanded sidebar so items lower down (Explore, More from YouTube, Report history) get captured too.
+        const g = document.querySelector('#guide-inner-content');
+        if (g) {
+          const max = Math.max(0, g.scrollHeight - g.clientHeight);
+          g.scrollTop = msg.y === 'random' ? Math.random() * max : msg.y === 'bottom' ? max : 0;
+        }
+        send({ ok: !!g });
         break;
       }
       case 'toggleSidebar': {
