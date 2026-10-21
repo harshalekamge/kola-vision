@@ -29,6 +29,13 @@
     return null;
   }
 
+  const TITLE_CLASSES = { 'home': 'home', 'shorts': 'shorts', 'subscriptions': 'subscriptions', 'history': 'history', 'watch later': 'watch_later' };
+  function titleClass(entry, a) {
+    const t = ((a && a.getAttribute('title')) || (entry.querySelector('.title, yt-formatted-string, .title-text') || entry).textContent || '')
+      .trim().toLowerCase().replace(/\s+/g, ' ');
+    return TITLE_CLASSES[t] || null;
+  }
+
   // true if node t is el or inside el (crosses shadow roots)
   function within(el, t) {
     while (t) {
@@ -77,10 +84,11 @@
 
     // Sidebar destinations (full guide and mini guide)
     document.querySelectorAll(SIDEBAR_SCOPE).forEach(scope => {
-      scope.querySelectorAll('a[href]').forEach(a => {
-        const c = sidebarClass(a.getAttribute('href'));
-        if (!c) return;
-        add(c, a.closest('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer') || a);
+      scope.querySelectorAll('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer').forEach(entry => {
+        const a = entry.querySelector('a');
+        // href first; fall back to the visible name (the Shorts entry often has no usable href)
+        const c = sidebarClass(a && a.getAttribute('href')) || titleClass(entry, a);
+        if (c) add(c, entry);
       });
     });
 
