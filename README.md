@@ -41,10 +41,9 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 ### 2. Get the trained model
 
-Model files are not stored in git. Put them in `models/`:
-
-- `models/kola_yolo.pt`: used with the full install (GPU)
-- `models/kola_yolo.onnx`: used with the lite install
+- `models/kola_yolo.onnx` **is included in the repo**, so the demo works right after cloning.
+- `models/kola_yolo.pt` (same model, runs on the GPU) is not in git. Download it from the Colab
+  training run and put it in `models/`. When it's there, the demo uses it automatically.
 
 To train your own, see [docs/DATASET_AND_TRAINING.md](docs/DATASET_AND_TRAINING.md).
 
@@ -53,8 +52,11 @@ To train your own, see [docs/DATASET_AND_TRAINING.md](docs/DATASET_AND_TRAINING.
 Every new terminal needs `.venv\Scripts\activate` first (the prompt shows `(.venv)`).
 
 ```bash
-python kola_demo.py --weights models/kola_yolo.pt
+python kola_demo.py
 ```
+
+It uses `models/kola_yolo.pt` with the full install and `models/kola_yolo.onnx` with the lite install.
+To choose a file yourself: `python kola_demo.py --weights models/kola_yolo.pt`.
 
 The first start downloads EasyOCR's text models (~100 MB). Wait for **"Kola is ready."** in the log.
 
