@@ -8,8 +8,12 @@ select_all, scroll, wait, wait_for.
 """
 import re
 
+# Longer phrases first, so "report history" wins over "history" and "youtube music" over "music".
 SIDEBAR_WORDS = [
-    ("watch later", "watch_later"), ("history", "history"),
+    ("youtube music", "youtube_music"), ("youtube kids", "youtube_kids"), ("youtube premium", "premium"),
+    ("report history", "report_history"), ("your channel", "your_channel"), ("my channel", "your_channel"),
+    ("watch later", "watch_later"), ("playlists", "playlists"), ("playables", "playables"),
+    ("premium", "premium"), ("gaming", "gaming"), ("music", "music"), ("history", "history"),
     ("subscriptions", "subscriptions"), ("subscription", "subscriptions"),
     ("home", "home"), ("shorts", "shorts"),
 ]

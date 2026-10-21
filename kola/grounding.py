@@ -15,7 +15,7 @@ A target is a small dict (this is the contract with the language-understanding m
 import re
 from difflib import SequenceMatcher
 
-from .classes import SINGLETON_CLASSES
+from .classes import SIDEBAR_CLASSES, SINGLETON_CLASSES
 
 
 # ---------- text matching ----------
@@ -149,7 +149,15 @@ def find_all(target, ctx, scope=None):
     typ = target.get("type", "text")
     if typ == "text" or typ not in ctx.known:
         phrase = target.get("text") or typ.replace("_", " ")
-        return _text_candidates(ctx, phrase, scope)
+        found = _text_candidates(ctx, phrase, scope)
+        if typ in SIDEBAR_CLASSES and ctx.img is not None:
+            # The model doesn't know this sidebar item yet: only accept the label inside the sidebar,
+            # so "Music" doesn't match the Music topic chip in the feed. The sidebar's right edge comes
+            # from sidebar items the model does detect; otherwise assume a typical sidebar width.
+            side = [e.box[2] for e in ctx.elements if e.cls in SIDEBAR_CLASSES]
+            edge = max(side) + 10 if side else ctx.img.width * 0.14
+            found = [e for e in found if e.center[0] < edge]
+        return found
 
     cands = [e for e in ctx.elements if e.cls == typ and (scope is None or scope.contains_point(*e.center))]
     if not cands:

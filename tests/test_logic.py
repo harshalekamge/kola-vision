@@ -95,6 +95,37 @@ def test_right_click_and_missing():
     assert el is None and "not visible" in why
 
 
+def test_v2_sidebar_phrases():
+    cases = {
+        "Go to Playlists": "playlists", "Open YouTube Music": "youtube_music", "Go to music": "music",
+        "Open YouTube Kids": "youtube_kids", "Show my channel": "your_channel", "Go to Your channel": "your_channel",
+        "Open report history": "report_history", "Go to History": "history", "Go to Gaming": "gaming",
+        "Open Playables": "playables", "Open YouTube Premium": "premium",
+    }
+    for cmd, cls in cases.items():
+        steps, _ = plan(cmd)
+        assert steps[0]["target"]["type"] == cls, (cmd, steps)
+    # topics still go to chips
+    assert plan("Switch feed to Gaming videos")[0][0]["target"] == {"type": "chip", "text": "Gaming"}
+    assert plan("Switch feed to Music")[0][0]["target"]["type"] == "chip"
+
+
+def test_sidebar_text_fallback_ignores_feed_chip():
+    """A v1 model doesn't know 'music': OCR must pick the sidebar label, not the Music chip."""
+    from PIL import Image
+    v1 = CLASSES[:12]
+    words = [("Music", (340, 75, 390, 95)), ("Music", (60, 530, 110, 550))]
+    # without any detected sidebar item (typical sidebar width is assumed)
+    ctx = Context(Image.new("RGB", (1920, 1080)), [], FakeOCR(words), known_classes=v1)
+    el, _ = ground({"type": "music"}, ctx)
+    assert el is not None and el.center[0] < 200
+    # with detected sidebar items marking the sidebar's edge
+    side = [Element("home", 0.9, (10, 100, 230, 140)), Element("history", 0.9, (10, 300, 230, 340))]
+    ctx = Context(Image.new("RGB", (1920, 1080)), side, FakeOCR(words), known_classes=v1)
+    el, _ = ground({"type": "music"}, ctx)
+    assert el is not None and el.center[0] < 200
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
