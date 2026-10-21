@@ -71,6 +71,13 @@ def main():
     shutil.copy(best, ROOT / "models" / "kola_yolo.pt")
     print(f"\nSaved model -> {ROOT / 'models' / 'kola_yolo.pt'}")
 
+    try:  # small ONNX copy for laptops without PyTorch (pip install -r requirements-lite.txt)
+        onnx = YOLO(str(best)).export(format="onnx", imgsz=a.imgsz, simplify=True)
+        shutil.copy(onnx, ROOT / "models" / "kola_yolo.onnx")
+        print(f"Saved ONNX  -> {ROOT / 'models' / 'kola_yolo.onnx'}")
+    except Exception as e:
+        print("ONNX export skipped:", e)
+
     metrics = YOLO(str(best)).val(data=str(data), imgsz=a.imgsz, device=device, verbose=False)
     print("\nPer-class mAP50:")
     for i, m in zip(metrics.box.ap_class_index, metrics.box.ap50):

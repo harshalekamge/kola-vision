@@ -1,0 +1,8 @@
+# Lightweight install for running the demo + collector (about 80 MB, no PyTorch).
+# Train on Google Colab instead (train_colab.ipynb) and use models/kola_yolo.onnx.
+onnxruntime>=1.17
+rapidocr_onnxruntime>=1.3
+mss>=9.0
+pyautogui>=0.9.54
+pillow>=10.0
+numpy

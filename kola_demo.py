@@ -1,6 +1,6 @@
 """Kola demo app — screen understanding + task execution on YouTube.
 
-    python kola_demo.py                      # uses models/kola_yolo.pt
+    python kola_demo.py                      # uses models/kola_yolo.onnx (or .pt)
     python kola_demo.py --weights path/to/best.pt --no-ocr
 
 Put YouTube in Chrome behind this window (best: Chrome full screen with F11).
@@ -177,7 +177,7 @@ class App:
             from kola.agent import Kola
             self.kola = Kola(self.weights, use_ocr=self.use_ocr, log=self.log, on_frame=self.frame)
             if self.kola.ocr is not None:
-                self.log("Warming up OCR (first time downloads its model)…")
+                self.log(f"Warming up OCR ({self.kola.ocr.backend})…")
                 from PIL import Image
                 self.kola.ocr.read(Image.new("RGB", (200, 60), "white"))
             self.q.put(("status", f"Ready · model {Path(self.weights).name} · classes: {', '.join(self.kola.detector.classes)}"))
@@ -261,7 +261,8 @@ class App:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--weights", default=str(ROOT / "models" / "kola_yolo.pt"))
+    onnx = ROOT / "models" / "kola_yolo.onnx"
+    ap.add_argument("--weights", default=str(onnx if onnx.exists() else ROOT / "models" / "kola_yolo.pt"))
     ap.add_argument("--no-ocr", action="store_true", help="skip OCR (chips/titles/text targets won't work)")
     a = ap.parse_args()
     root = tk.Tk()

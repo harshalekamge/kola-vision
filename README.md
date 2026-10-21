@@ -28,11 +28,14 @@ search_button, chip, video_card, short_card, sponsored_card`.
 
 ## Tonight's plan (~3 hours)
 
-### 1. Install (10 min)
+### 1. Install
 Python 3.10–3.12 recommended.
+
+**Slow internet (recommended):** about 80 MB, no PyTorch. Train on Colab, run the demo with the ONNX model.
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-lite.txt
 ```
+**Full install (~3.5 GB):** only if you want to train on your own GPU. `pip install -r requirements.txt`
 
 ### 2. Collect the dataset (45–60 min, mostly automatic)
 1. Start the server: `python collector/collector_server.py`
@@ -50,17 +53,17 @@ pip install -r requirements.txt
 ### 3. Train (30–60 min)
 - **NVIDIA GPU:** `python train.py`
 - **No GPU:** use Google Colab (free T4 GPU). Zip the `dataset` folder, open `train_colab.ipynb` in Colab,
-  upload `dataset.zip`, `train.py` and `kola/classes.py`, then run all cells. It downloads `kola_yolo.pt`.
+  upload `dataset.zip`, `train.py` and `kola/classes.py`, then run all cells. It downloads `kola_yolo.onnx` (~10 MB).
 - **CPU only and no Colab:** `python train.py --epochs 25` (slower and less accurate, but works).
 
-Put the result at `models/kola_yolo.pt`. Training prints per-class accuracy (mAP50). Show this in the presentation.
+Put the result at `models/kola_yolo.onnx` (or `kola_yolo.pt` with the full install). Training prints per-class accuracy (mAP50). Show this in the presentation.
 Also show `runs/kola/` → `results.png`, `confusion_matrix.png`, `val_batch0_pred.jpg`.
 
 ### 4. Run the demo
 ```bash
 python kola_demo.py
 ```
-The first start downloads the OCR model (~100 MB).
+With the lite install, OCR runs offline (RapidOCR).
 
 ---
 

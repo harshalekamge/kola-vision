@@ -29,6 +29,7 @@ from kola.classes import CLASSES  # noqa: E402
 DATASET = ROOT / "dataset"
 VAL_FRACTION = 0.15
 PORT = 8765
+MAX_WIDTH = 1280
 lock = threading.Lock()
 
 
@@ -59,6 +60,8 @@ def save_sample(payload):
     raw = base64.b64decode(data_url.split(",", 1)[1])
     img = Image.open(io.BytesIO(raw)).convert("RGB")
     w, h = img.size
+    if w > MAX_WIDTH:  # smaller files = faster upload to Colab; labels are normalized so they stay valid
+        img = img.resize((MAX_WIDTH, round(h * MAX_WIDTH / w)), Image.LANCZOS)
     vw, vh = float(payload["vw"]), float(payload["vh"])
 
     # Screenshot must cover exactly the viewport the boxes were measured in.
@@ -82,7 +85,7 @@ def save_sample(payload):
     split = "val" if random.random() < VAL_FRACTION else "train"
     name = f"{int(time.time() * 1000)}_{random.randint(1000, 9999)}"
     with lock:
-        img.save(DATASET / "images" / split / f"{name}.jpg", quality=92)
+        img.save(DATASET / "images" / split / f"{name}.jpg", quality=85)
         (DATASET / "labels" / split / f"{name}.txt").write_text("\n".join(lines) + "\n")
         with open(DATASET / "meta.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps({"name": name, "split": split, "url": payload.get("url"), "theme": payload.get("theme"),

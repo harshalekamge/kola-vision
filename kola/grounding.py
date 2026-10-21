@@ -90,7 +90,7 @@ class Context:
     def words(self):
         if self._words is None:
             if self.ocr is None:
-                raise RuntimeError("This step needs text reading (OCR). Install it: pip install easyocr")
+                raise RuntimeError("This step needs text reading (OCR). Install it: pip install rapidocr_onnxruntime")
             self._words = self.ocr.read(self.img)
         return self._words
 

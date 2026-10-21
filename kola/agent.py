@@ -42,18 +42,18 @@ def screen_changed(a, b, threshold=1.5):
 
 class Kola:
     def __init__(self, weights, use_ocr=True, log=print, on_frame=None, speed=1.0):
-        from .detector import Detector
+        from .detector import load_detector
         from .executor import Executor
         from .ocr import OCR
         from .screen import Screen
         self.log = log
         self.on_frame = on_frame or (lambda img: None)
         self.screen = Screen()
-        self.detector = Detector(weights)
+        self.detector = load_detector(weights)
         self.ocr = OCR() if use_ocr and OCR.available() else None
         self.hands = Executor(speed=speed)
         if use_ocr and self.ocr is None:
-            self.log("OCR not installed (pip install easyocr): text targets like chips/titles won't work.")
+            self.log("OCR not installed (pip install rapidocr_onnxruntime): text targets like chips/titles won't work.")
 
     # ---- perception ----
     def look(self):
