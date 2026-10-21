@@ -6,6 +6,7 @@ from PIL import ImageChops, ImageDraw
 from .classes import CLASSES, FEED_CLASSES, SIDEBAR_CLASSES
 from .grounding import Context, describe, ground
 
+TARGET = "#F4A62A"  # Kola's focus colour: the element it is about to act on
 POINTER_ACTIONS = {"left_click", "right_click", "double_click", "hover"}
 PALETTE = ["#e6194b", "#3cb44b", "#4363d8", "#f58231", "#911eb4", "#46f0f0",
            "#f032e6", "#bcf60c", "#fabebe", "#008080", "#9a6324", "#800000"]
@@ -23,10 +24,12 @@ def annotate(img, elements, target=None, max_w=1100):
     if target is not None:
         x1, y1, x2, y2 = target.box
         for k in range(3):
-            d.rectangle((x1 - 4 - k * 3, y1 - 4 - k * 3, x2 + 4 + k * 3, y2 + 4 + k * 3), outline="#ff0000", width=lw)
+            d.rectangle((x1 - 4 - k * 3, y1 - 4 - k * 3, x2 + 4 + k * 3, y2 + 4 + k * 3), outline=TARGET, width=lw)
         cx, cy = target.center
         r = 10 * lw
-        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline="#ff0000", width=lw * 2)
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=TARGET, width=lw * 2)
+        d.line((cx - 2 * r, cy, cx + 2 * r, cy), fill=TARGET, width=lw)
+        d.line((cx, cy - 2 * r, cx, cy + 2 * r), fill=TARGET, width=lw)
     if im.width > max_w:
         im = im.resize((max_w, int(im.height * max_w / im.width)))
     return im
@@ -71,14 +74,20 @@ class Kola:
 
     # ---- execution ----
     def run(self, steps, stop=None):
+        """Run steps in order. on_step(index, state) is called with 'running', 'done' or 'failed'."""
+        notify = getattr(self, "on_step", None) or (lambda i, state: None)
         for i, step in enumerate(steps, 1):
             if stop is not None and stop.is_set():
                 self.log("Stopped.")
+                notify(i, "failed")
                 return False
             self.log(f"Step {i}/{len(steps)}: {step_text(step)}")
+            notify(i, "running")
             if not self.run_step(step):
                 self.log(f"✗ Step {i} failed.")
+                notify(i, "failed")
                 return False
+            notify(i, "done")
         self.log("✓ Task complete.")
         return True
 
