@@ -83,6 +83,14 @@
     return { x1, y1, x2, y2 };
   }
 
+  // A card counts only once its thumbnail and text have loaded; empty placeholders would teach
+  // the model that a blank grey box is a video.
+  function loaded(card) {
+    const thumb = [...card.querySelectorAll('img')].some(i =>
+      i.complete && i.naturalWidth > 0 && i.getBoundingClientRect().width > 80);
+    return thumb && card.textContent.trim().length > 8;
+  }
+
   const area = b => (b.x2 - b.x1) * (b.y2 - b.y1);
   const containsBox = (a, b, tol = 3) =>
     b.x1 >= a.x1 - tol && b.y1 >= a.y1 - tol && b.x2 <= a.x2 + tol && b.y2 <= a.y2 + tol;
@@ -132,11 +140,12 @@
 
     // Feed cards
     document.querySelectorAll(AD_SEL).forEach(el => add('sponsored_card', el));
-    document.querySelectorAll(SHORTS_SEL).forEach(el => add('short_card', el));
+    document.querySelectorAll(SHORTS_SEL).forEach(el => { if (loaded(el)) add('short_card', el); });
     document.querySelectorAll(VIDEO_SEL).forEach(el => {
       if (el.closest(AD_SEL) || el.querySelector(AD_SEL)) return;
       if (el.querySelector(SHORTS_SEL) || el.closest(SHORTS_SHELF_SEL)) return;
       if (el.closest(SIDEBAR_SCOPE)) return;
+      if (!loaded(el)) return;
       add('video_card', el);
     });
 
