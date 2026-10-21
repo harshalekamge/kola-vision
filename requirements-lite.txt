@@ -6,3 +6,4 @@ mss>=9.0
 pyautogui>=0.9.54
 pillow>=10.0
 numpy
+customtkinter>=5.2
