@@ -56,7 +56,10 @@ A `~` before a phrase allows a fuzzy match (OCR mistakes, truncated titles). Wit
 stricter. Matching always ignores case and punctuation.
 
 **Element types:** `home`, `shorts`, `subscriptions`, `history`, `watch_later`, `menu_button`,
-`search_box`, `search_button`, `chip`, `video_card`, `short_card`, `sponsored_card`, plus `text`.
+`search_box`, `search_button`, `chip`, `video_card`, `short_card`, `sponsored_card`,
+`your_channel`, `playlists`, `music`, `gaming`, `playables`, `premium`, `youtube_music`,
+`youtube_kids`, `report_history`, plus `text`. Sidebar types are found even when the sidebar
+is collapsed or scrolled; Kola opens or scrolls it.
 Any other type name is treated as text to find on screen (e.g. `"liked_videos"` → "liked videos").
 
 ## The five scenarios as steps

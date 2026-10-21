@@ -1,4 +1,5 @@
 dataset/
+dataset_*/
 runs/
 models/*.pt
 __pycache__/

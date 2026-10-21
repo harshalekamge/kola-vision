@@ -85,7 +85,8 @@ coordinates even at 125%/150% scaling. On Retina Macs the 2× factor is computed
 
 | Situation | Recovery |
 |---|---|
-| Sidebar target missing (e.g. History with the sidebar collapsed) | Click the menu button, look again |
+| Sidebar target missing and the sidebar is collapsed (only Home/Shorts/Subscriptions visible) | Click the menu button, look again |
+| Sidebar target missing and the sidebar is open | Scroll over the sidebar toward the target (up or down, from the sidebar's top-to-bottom order) |
 | Card missing (video, Short, ad) | Scroll the feed down, look again |
 | Results still loading after a search | `wait_for` step polls until the target type appears |
 

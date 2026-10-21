@@ -19,6 +19,18 @@ automatically: no boxes were drawn by hand.
 | 9 | `video_card` | A video tile on the home grid or in search results |
 | 10 | `short_card` | A vertical card in a Shorts shelf |
 | 11 | `sponsored_card` | An ad / sponsored tile |
+| 12 | `your_channel` | Sidebar (You): Your channel *(v2)* |
+| 13 | `playlists` | Sidebar (You): Playlists *(v2)* |
+| 14 | `music` | Sidebar (Explore): Music *(v2)* |
+| 15 | `gaming` | Sidebar (Explore): Gaming *(v2)* |
+| 16 | `playables` | Sidebar (Explore): Playables *(v2)* |
+| 17 | `premium` | Sidebar (More from YouTube): YouTube Premium *(v2)* |
+| 18 | `youtube_music` | Sidebar (More from YouTube): YouTube Music *(v2)* |
+| 19 | `youtube_kids` | Sidebar (More from YouTube): YouTube Kids *(v2)* |
+| 20 | `report_history` | Sidebar (bottom): Report history *(v2)* |
+
+**v1** (the first model, results below) has classes 0–11. **v2** adds 12–20. A v1 model still
+handles the v2 destinations by reading their labels with OCR, limited to the sidebar area.
 
 The order is defined in `kola/classes.py`. Class IDs in label files depend on it, so new classes must
 be appended at the end.
@@ -46,11 +58,13 @@ The extension's auto mode changes conditions between captures:
 - visits home, search results (18 different queries) and subscriptions;
 - toggles the sidebar between expanded and collapsed (mini guide);
 - randomizes zoom between 80% and 125%;
-- scrolls to random positions (40% of captures at the top).
+- scrolls to random positions (40% of captures at the top);
+- *(v2)* scrolls the expanded sidebar to the top, bottom or a random position, so items far down
+  the sidebar (Explore, More from YouTube, Report history) are captured.
 
 Manually, collection was repeated in **light theme**, **dark theme** and **F11 full screen**.
 
-### Collected dataset
+### Collected dataset (v1)
 
 700 screenshots (585 train, 115 val), 11,884 labeled boxes:
 
@@ -106,7 +120,7 @@ Hardware: Google Colab, Tesla T4. Training time: **21 minutes**.
 | `cls_loss` | How wrong the class prediction is | 3.297 → 0.196 |
 | `dfl_loss` | Fine-grained box-edge distribution error | 1.390 → 0.782 |
 
-## 5. Results (validation set, 115 images, 1,937 boxes)
+## 5. Results: v1 model (validation set, 115 images, 1,937 boxes)
 
 | Metric | Value | Meaning |
 |---|---|---|
@@ -158,3 +172,15 @@ collected separately.
 python train.py              # yolo11n, 960 px, 60 epochs
 python train.py --model yolo11s.pt --epochs 80   # bigger, more accurate
 ```
+
+## 7. Training v2 (the extra sidebar classes)
+
+The v1 screenshots show items like *Playlists* and *Gaming* **without labels** for them. Training v2
+on that data would teach the model those items are background, so v2 needs a fresh dataset.
+
+1. Keep v1: rename `dataset` to `dataset_v1` and `models/kola_yolo.pt` to `models/kola_yolo_v1.pt`.
+2. Reload the extension (`chrome://extensions` → ↻) and refresh YouTube.
+3. **Preview labels** with the sidebar expanded, and scrolled down: the new items get boxes.
+4. Collect as before (light 300, dark 300, F11 100) with **Scroll the sidebar** ticked.
+5. `python tools/review_labels.py`: every new class should have 100+ boxes.
+6. Train on Colab exactly as for v1; record the new per-class results here.
