@@ -42,10 +42,10 @@ def screen_changed(a, b, threshold=1.5):
 
 class Kola:
     def __init__(self, weights, use_ocr=True, log=print, on_frame=None, speed=1.0):
+        from .screen import Screen  # first: makes the process DPI-aware before the mouse library loads
         from .detector import load_detector
         from .executor import Executor
         from .ocr import OCR
-        from .screen import Screen
         self.log = log
         self.on_frame = on_frame or (lambda img: None)
         self.screen = Screen()
