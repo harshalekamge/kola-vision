@@ -653,7 +653,14 @@ def main():
     ctk.set_appearance_mode("light")
     root = ctk.CTk()
     App(root, a.weights, not a.no_ocr)
-    root.mainloop()
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:  # Ctrl+C in the terminal: close quietly instead of printing a traceback
+        try:
+            root.destroy()
+        except Exception:
+            pass
+        print("Kola closed.")
 
 
 if __name__ == "__main__":
