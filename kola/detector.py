@@ -75,9 +75,17 @@ class OnnxDetector:
         r = min(s / W, s / H)
         nw, nh = round(W * r), round(H * r)
         px, py = (s - nw) // 2, (s - nh) // 2
-        canvas = Image.new("RGB", (s, s), (114, 114, 114))
-        canvas.paste(img.convert("RGB").resize((nw, nh), Image.BILINEAR), (px, py))
-        x = np.asarray(canvas, dtype=np.float32).transpose(2, 0, 1)[None] / 255.0
+        # Letterbox exactly like Ultralytics did during training: OpenCV linear resize, grey padding.
+        # (Pillow's resize smooths differently and shifts the scores, e.g. on browser toolbars.)
+        rgb = np.asarray(img.convert("RGB"))
+        try:
+            import cv2
+            small = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
+        except ImportError:
+            small = np.asarray(Image.fromarray(rgb).resize((nw, nh), Image.BILINEAR))
+        canvas = np.full((s, s, 3), 114, dtype=np.uint8)
+        canvas[py:py + nh, px:px + nw] = small
+        x = canvas.astype(np.float32).transpose(2, 0, 1)[None] / 255.0
 
         out = self.sess.run(None, {self.input_name: x})[0][0].T  # (N, 4 + num_classes)
         scores = out[:, 4:]
