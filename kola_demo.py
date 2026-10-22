@@ -120,6 +120,10 @@ def friendly_detail(msg):
     return m
 
 
+FULL_SIZE = (1280, 800)     # preferred window size (logical pixels), shrunk to fit the screen
+COMPACT_SIZE = (900, 620)
+
+
 class Tooltip:
     """Small label that appears next to a widget on hover."""
 
@@ -171,8 +175,7 @@ class App:
         self.f_mono = ctk.CTkFont("Consolas", 12)
 
         root.title("Kola")
-        root.geometry("1440x880")
-        root.minsize(1180, 740)
+        self.compact = False
         root.configure(fg_color=BG)
         root.grid_columnconfigure(2, weight=1)
         root.grid_rowconfigure(1, weight=1)
@@ -183,6 +186,7 @@ class App:
         self._center()
         self._right_column()
 
+        self._fit_window(*FULL_SIZE)
         threading.Thread(target=self._load, daemon=True).start()
         root.after(80, self._poll)
 
@@ -231,10 +235,13 @@ class App:
         self.model_label = self.label(status, "", self.f_small, MUTED)
         self.model_label.pack(side="left", padx=(12, 18))
         self.pill(bar, "Look at screen", self.look, width=150, height=44).pack(side="right")
+        self.compact_btn = self.pill(bar, "Compact view", self.toggle_compact, dark=False, width=130, height=44)
+        self.compact_btn.pack(side="right", padx=10)
 
     def _left_column(self):
-        col = ctk.CTkFrame(self.root, fg_color="transparent", width=250)
+        col = ctk.CTkFrame(self.root, fg_color="transparent", width=230)
         col.grid(row=1, column=1, sticky="ns", padx=(10, 6), pady=(0, 18))
+        self.left_col = col
         self.label(col, "Try a task", self.f_h).pack(anchor="w", padx=6, pady=(2, 8))
         for title, command in EXAMPLES:
             c = self.card(col)
@@ -244,7 +251,7 @@ class App:
             self.label(head, title, self.f_h).pack(side="left")
             ctk.CTkButton(head, text="↗", width=30, height=30, corner_radius=15, fg_color=SOFT, hover_color=LINE,
                           text_color=INK, font=self.f_body, command=lambda t=command: self._use_example(t)).pack(side="right")
-            self.label(c, command, self.f_small, MUTED, wraplength=200, justify="left", anchor="w").pack(
+            self.label(c, command, self.f_small, MUTED, wraplength=185, justify="left", anchor="w").pack(
                 fill="x", padx=18, pady=(0, 16))
             for w in (c, head):
                 w.bind("<Button-1>", lambda e, t=command: self._use_example(t))
@@ -307,7 +314,7 @@ class App:
         self.circle(bar, "↑", self.run_command, dark=True, size=42).pack(side="right", padx=8, pady=8)
 
     def _right_column(self):
-        col = ctk.CTkFrame(self.root, fg_color="transparent", width=340)
+        col = ctk.CTkFrame(self.root, fg_color="transparent", width=310)
         col.grid(row=1, column=3, sticky="ns", padx=(6, 22), pady=(0, 18))
         col.grid_propagate(False)
         col.grid_columnconfigure(0, weight=1)
@@ -322,7 +329,7 @@ class App:
         self.steps_box.pack(fill="both", expand=True, padx=10)
         self.empty = self.label(self.steps_box, "Each step shows up here as Kola works.", self.f_small, MUTED)
         self.empty.pack(anchor="w", padx=12)
-        self.result = self.label(p, "", self.f_bold, wraplength=290, justify="left", anchor="w")
+        self.result = self.label(p, "", self.f_bold, wraplength=260, justify="left", anchor="w")
         self.result.pack(fill="x", padx=22, pady=(4, 18))
 
         # do one thing
@@ -369,6 +376,39 @@ class App:
                         text_color=INK, fg_color=INK, hover_color=INK_HOVER, border_color="#C9CFD9",
                         checkmark_color=CARD, corner_radius=7, checkbox_width=22, checkbox_height=22).pack(
             anchor="w", padx=22, pady=(12, 18))
+
+    def _fit_window(self, want_w, want_h):
+        """Size the window to fit this screen (whatever the display scaling) and centre it."""
+        root = self.root
+        root.update_idletasks()
+        try:
+            scale = ctk.ScalingTracker.get_window_scaling(root)
+        except Exception:
+            scale = 1.0
+        screen_w = root.winfo_screenwidth() / scale
+        screen_h = root.winfo_screenheight() / scale
+        w = int(min(want_w, screen_w * 0.94))
+        h = int(min(want_h, screen_h * 0.86))   # leave room for the taskbar and title bar
+        x = int((screen_w - w) / 2)
+        y = int(max(0, (screen_h - h) / 2 - 20))
+        root.minsize(min(w, 820), min(h, 560))
+        root.geometry(f"{w}x{h}+{x}+{y}")
+
+    def toggle_compact(self):
+        """Compact view: just the live view, the command bar, progress and quick actions."""
+        self.compact = not self.compact
+        if self.compact:
+            self.left_col.grid_remove()
+            self.panel.grid_remove()
+            self.compact_btn.configure(text="Full view")
+            self._fit_window(*COMPACT_SIZE)
+        else:
+            self.left_col.grid()
+            self.panel.grid()
+            self.compact_btn.configure(text="Compact view")
+            self._fit_window(*FULL_SIZE)
+        if self._last_frame is not None:
+            self.root.after(150, lambda: self._show(self._last_frame))
 
     def toggle_panel(self):
         """Show or hide the steps + log panel under the live view."""
@@ -468,9 +508,9 @@ class App:
             icon.pack(side="left", anchor="n")
             col = ctk.CTkFrame(row, fg_color="transparent")
             col.pack(side="left", fill="x", expand=True)
-            title = self.label(col, say(step), self.f_body, wraplength=240, justify="left", anchor="w", height=22)
+            title = self.label(col, say(step), self.f_body, wraplength=220, justify="left", anchor="w", height=22)
             title.pack(fill="x")
-            detail = self.label(col, "", self.f_small, MUTED, wraplength=240, justify="left", anchor="w", height=18)
+            detail = self.label(col, "", self.f_small, MUTED, wraplength=220, justify="left", anchor="w", height=18)
             self._rows.append((icon, title, detail))
         self.result.configure(text="")
         self.steps_text.delete("1.0", "end")
