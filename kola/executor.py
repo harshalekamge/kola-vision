@@ -44,5 +44,17 @@ class Executor:
         pyautogui.hotkey("command" if sys.platform == "darwin" else "ctrl", "a")
 
     def scroll(self, x, y, clicks):
+        """Scroll by `clicks` mouse-wheel notches (negative = down) with the pointer at (x, y).
+
+        On Windows, pyautogui passes the number straight to the system as wheel units, and one
+        notch is 120 units, so scroll(5) barely moves the page. Send real notches there, one at a
+        time, so the page scrolls visibly like a person turning the wheel.
+        """
         self.move(x, y)
-        pyautogui.scroll(clicks)
+        if sys.platform.startswith("win"):
+            step = 120 if clicks > 0 else -120
+            for _ in range(abs(int(clicks))):
+                pyautogui.scroll(step)
+                time.sleep(0.04)
+        else:
+            pyautogui.scroll(clicks)
