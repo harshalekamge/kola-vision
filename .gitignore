@@ -3,6 +3,7 @@ dataset_*/
 runs/
 models/*.pt
 __pycache__/
+.venv/
 *.pyc
 yolo*.pt
 
