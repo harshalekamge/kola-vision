@@ -76,6 +76,8 @@ The first start downloads EasyOCR's text models (~100 MB). Wait for **"Kola is r
 Kola minimizes itself, moves the cursor, acts, and comes back. **Progress** lists each step in
 plain words as it happens; the live view rings what Kola acted on in amber.
 **Stop:** ■ on the left, or move the mouse hard into a screen corner.
+**Compact view** (top right) shrinks Kola to the live view, command bar and progress; **Full view** brings
+back the example tasks and the steps and log panels. The window sizes itself to your screen.
 
 ### Demo commands
 
