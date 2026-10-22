@@ -30,7 +30,7 @@ For every pointer step (click, hover...), the agent runs **look â†’ understand â
 
 | File | Role |
 |---|---|
-| `kola/classes.py` | The 12 element classes, and which are sidebar / single-instance / feed elements |
+| `kola/classes.py` | The 24 element classes, the sidebar's top-to-bottom order, and which are sidebar / single-instance / feed elements |
 | `kola/screen.py` | Screen capture with `mss`; converts image pixels to mouse coordinates (handles Windows DPI scaling and Mac Retina) |
 | `kola/detector.py` | Runs the trained model: `.pt` via Ultralytics (GPU), `.onnx` via onnxruntime (no PyTorch) |
 | `kola/ocr.py` | Reads on-screen words. Uses RapidOCR, Windows OCR or EasyOCR, whichever is installed |
@@ -105,7 +105,7 @@ reports whether the screen changed.
 
 ## Limitations
 
-- Knows YouTube's 12 element types. Other sites need new data (the collector makes this cheap).
+- Knows YouTube's 24 element types (v2). Other sites need new data (the collector makes this cheap).
 - Big YouTube redesigns need re-collecting and retraining.
 - OCR can misread stylized or very small text.
 - Sponsored cards depend on ads appearing, so they have the least training data.

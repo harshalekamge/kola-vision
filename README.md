@@ -41,8 +41,11 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 ### 2. Get the trained model
 
-- `models/kola_yolo.onnx` **is included in the repo**, so the demo works right after cloning.
-- `models/kola_yolo.pt` (same model, runs on the GPU) is not in git. Download it from the Colab
+- `models/kola_yolo.onnx` **is included in the repo** (v2, 24 element types), so the demo works
+  right after cloning.
+- `models/kola_yolo_v1.onnx` is the earlier 12-type model, kept for comparison
+  (`python kola_demo.py --weights models/kola_yolo_v1.onnx`).
+- `models/kola_yolo.pt` (same v2 model, runs on the GPU) is not in git. Download it from the Colab
   training run and put it in `models/`. When it's there, the demo uses it automatically.
 
 To train your own, see [docs/DATASET_AND_TRAINING.md](docs/DATASET_AND_TRAINING.md).
@@ -58,7 +61,8 @@ python kola_demo.py
 It uses `models/kola_yolo.pt` with the full install and `models/kola_yolo.onnx` with the lite install.
 To choose a file yourself: `python kola_demo.py --weights models/kola_yolo.pt`.
 
-The first start downloads EasyOCR's text models (~100 MB). Wait for **"Kola is ready."** in the log.
+The first start downloads EasyOCR's text models (~100 MB). Wait until the status at the top says
+**Ready** (green dot).
 
 ### 4. Use it
 
@@ -107,7 +111,8 @@ and the rest of the sidebar: `Go to Playlists`, `Open Liked videos`, `Open YouTu
 | Text targets (chips, titles) fail | Wait for "Kola is ready."; check the text is actually on screen |
 | macOS | Allow Terminal in Privacy & Security → *Screen Recording* and *Accessibility* |
 
-Run the logic tests (no model or screen needed): `python tests/test_logic.py`
+Run the tests (no model or screen needed): `python tests/test_logic.py`, `python tests/test_agent_flow.py`,
+`python tests/test_executor.py`
 
 ## Project layout
 

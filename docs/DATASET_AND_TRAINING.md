@@ -92,12 +92,13 @@ confidences for the whole image.
 
 - **Backbone:** convolutional layers that extract visual features (edges → icons, text blocks, thumbnails).
 - **Neck:** merges features at three scales, so small targets (sidebar icons) and large ones (cards) are both found.
-- **Head:** for each location, predicts box edges and a score for each of the 12 classes.
+- **Head:** for each location, predicts box edges and a score for each class (12 in v1, 24 in v2).
 
 Size: 2.6 M parameters, 6.5 GFLOPs, 5.5 MB (`.pt`) / 10.4 MB (`.onnx`).
 
 **Transfer learning:** training starts from weights pre-trained on COCO (80 everyday object classes).
-The classification head is replaced for 12 classes; 493 of 499 weight tensors are reused.
+The classification head is replaced for Kola's classes (12 in v1, 24 in v2); 493 of 499 weight
+tensors are reused.
 
 ## 4. Training setup
 
