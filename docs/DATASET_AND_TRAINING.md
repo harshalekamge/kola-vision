@@ -186,4 +186,43 @@ on that data would teach the model those items are background, so v2 needs a fre
 3. **Preview labels** with the sidebar expanded, and scrolled down: the new items get boxes.
 4. Collect as before (light 300, dark 300, F11 100) with **Scroll the sidebar** ticked.
 5. `python tools/review_labels.py`: every new class should have 100+ boxes.
-6. Train on Colab exactly as for v1; record the new per-class results here.
+6. Train on Colab exactly as for v1.
+
+### v2 dataset
+
+700 screenshots (588 train, 112 val), 13,900 labeled boxes, collected with sidebar scrolling and
+with still-loading video cards skipped.
+
+| Class | Boxes | Class | Boxes | Class | Boxes |
+|---|---|---|---|---|---|
+| home | 525 | video_card | 1,337 | premium | 198 |
+| shorts | 546 | short_card | 736 | youtube_music | 162 |
+| subscriptions | 560 | sponsored_card | 113 | youtube_kids | 158 |
+| history | 228 | your_channel | 224 | report_history | 145 |
+| watch_later | 239 | playlists | 231 | liked_videos | 265 |
+| menu_button | 656 | music | 300 | your_videos | 267 |
+| search_box | 656 | gaming | 288 | downloads | 277 |
+| search_button | 656 | playables | 285 | | |
+| chip | 4,848 | | | | |
+
+### v2 results (validation set, 112 images, 2,364 boxes)
+
+Trained on a Tesla T4: 60 epochs in **16 minutes**, batch 16 (AutoBatch), AdamW lr 0.000357.
+
+| Metric | v1 (12 classes) | v2 (24 classes) |
+|---|---|---|
+| Precision | 0.983 | **0.998** |
+| Recall | 0.986 | **0.996** |
+| mAP50 | 0.990 | **0.995** |
+| mAP50-95 | 0.987 | 0.981 |
+
+Per class, mAP50 is 0.995 for every class except `youtube_music` (0.987 in the final evaluation).
+The strictest score, mAP50-95, is lowest for `menu_button` (0.928), `youtube_music` (0.945) and
+`downloads` (0.949): these are found reliably, but their box edges are placed slightly less
+precisely, which doesn't affect clicking the center. `sponsored_card` improved from 0.956 (v1) to
+0.995, likely because unloaded placeholder cards are no longer labeled.
+
+Inference on the T4: 24 ms per image (PyTorch). The ONNX export scores mAP50 0.995 / mAP50-95 0.985.
+
+As with v1, validation images come from the same collection sessions as training, so accuracy on a
+new day, account or language may be lower.
