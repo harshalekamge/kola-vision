@@ -16,9 +16,40 @@ mouse to hover and click it, then checks that the screen changed.
 
 ---
 
+## Prerequisites
+
+| Requirement | Details | Check |
+|---|---|---|
+| Python | 3.10 – 3.12 (64-bit) | `python --version` |
+| pip | comes with Python | `pip --version` |
+| Git | to clone the repo | `git --version` |
+| Google Chrome | logged in to YouTube | — |
+| OS | Windows 10/11 (main target). macOS works with Screen Recording + Accessibility permissions | — |
+| NVIDIA GPU + driver | optional — faster detection with the `.pt` model | `nvidia-smi` |
+| Disk / network | ~3 GB for the full install (PyTorch), or ~80 MB for the lite install; ~100 MB more for OCR models on first run | — |
+
+## Tech stack
+
+| Part | Technology |
+|---|---|
+| Element detection | YOLO11 (Ultralytics) — 24 YouTube UI element classes; ONNX Runtime for the lite build |
+| Text reading | EasyOCR (full) or RapidOCR (lite) |
+| Screen capture | `mss` |
+| Mouse / keyboard | `pyautogui` |
+| Desktop UI | CustomTkinter |
+| Dataset collection | Chrome extension (Manifest V3) + local Python collector server |
+| Training | `train.py` locally or `train_colab.ipynb` on a free Colab GPU |
+
 ## Run the demo
 
 ### 1. Install (once)
+
+Clone the repository:
+
+```bash
+git clone https://github.com/harshalekamge/kola-vision.git
+cd kola-vision
+```
 
 Windows, in the project folder:
 
@@ -26,6 +57,14 @@ Windows, in the project folder:
 python -m venv .venv
 .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+pip install -r requirements.txt
+```
+
+macOS / Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -111,8 +150,36 @@ and the rest of the sidebar: `Go to Playlists`, `Open Liked videos`, `Open YouTu
 | Text targets (chips, titles) fail | Wait for "Kola is ready."; check the text is actually on screen |
 | macOS | Allow Terminal in Privacy & Security → *Screen Recording* and *Accessibility* |
 
-Run the tests (no model or screen needed): `python tests/test_logic.py`, `python tests/test_agent_flow.py`,
-`python tests/test_executor.py`
+## Tests
+
+No model or screen is needed:
+
+```bash
+python tests/test_logic.py        # planner + grounding
+python tests/test_agent_flow.py   # agent loop with a simulated screen, model and mouse
+python tests/test_executor.py     # executor scrolling (pyautogui replaced by a recorder)
+```
+
+## Collect data and train your own model (quick reference)
+
+Full guide: [docs/DATASET_AND_TRAINING.md](docs/DATASET_AND_TRAINING.md).
+
+```bash
+# 1. Start the collector server (saves screenshots + YOLO labels into dataset/)
+python collector/collector_server.py
+
+# 2. Load the extension: Chrome → chrome://extensions → Developer mode → Load unpacked → collector/extension
+#    Browse YouTube; the extension auto-labels elements and sends them to the server.
+
+# 3. Check the labels by eye (writes images to dataset/review/)
+python tools/review_labels.py --n 12
+
+# 4. Train (local GPU) — or upload dataset.zip to train_colab.ipynb for a free Colab GPU
+python train.py                                   # yolo11n, 960 px, 60 epochs
+python train.py --model yolo11s.pt --epochs 80    # bigger, more accurate
+```
+
+Put the resulting `kola_yolo.pt` (or exported `.onnx`) in `models/`.
 
 ## Project layout
 
